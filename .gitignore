@@ -3,3 +3,32 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# bloop and metals
+.bloop
+.bsp
+.metals
+project/metals.sbt
+.scalafmt.conf
+
+#vscode
+.vscode
+
+# scala 3
+.tasty
+
+# sbt
+project/project/
+project/target/
+target/
+
+#coursier
+null/
+
+# other
+.history
+.scala_dependencies
+.cache-main
+
+
+
