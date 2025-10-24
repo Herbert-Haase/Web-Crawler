@@ -14,6 +14,5 @@ package de.htwg.webcrawler {
 
     println(horizontal_line)
     // development
-    // experimental2
-
+    // development2
 }
