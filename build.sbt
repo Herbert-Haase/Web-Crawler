@@ -1,4 +1,4 @@
-val scala3Version = "3.7.3"
+val scala3Version = "3.4.2" // Use a stable Scala version
 
 lazy val root = project
   .in(file("."))
@@ -8,5 +8,9 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test
+    // You only need this one line for ScalaTest
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    coverageMinimumStmtTotal := 100,
+    coverageExcludedFiles := ".*Main\\.scala",
   )
