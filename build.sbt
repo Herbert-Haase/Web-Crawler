@@ -9,5 +9,8 @@ lazy val root = project
     scalaVersion := scala3Version,
 
     // You only need this one line for ScalaTest
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    coverageMinimumStmtTotal := 100,
+    coverageExcludedFiles := ".*Main\\.scala",
   )

@@ -2,42 +2,67 @@ package de.htwg.webcrawler
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webcrawler.TUI.* // Import your functions
+import java.io.{File, PrintWriter}
+import de.htwg.webcrawler.TUI.*
 
 class WebCrawlerSpec extends AnyWordSpec with Matchers {
 
   "A TUI" should {
-    "have a horizontal line of form '++'" in {
-      hline() should be("++")
-    }
-    "have a scalable horizontal line" in {
-      hline(3) should be("+---+")
-    }
-    "have an empty line with default width" in {
-      line() should be("|" + "|")
-    }
-    "have a line with specific text and width" in {
-      line(0, "hello") should be("||")
-      line(6, "") should be("|      |")
-      line(2, "hello") should be("|he|")
-      line(9, "hello") should be("|hello    |")
-    }
-    "have wrap lines" in {
-    val resource = getClass.getClassLoader.getResource("example.txt")
-    val filePath = resource.getPath
 
-    val expectedOutput = List(
-      "hello",
-      "world",
-      "hi",
-      "hi",
-      "averyl",
-      "ongwor",
-      "dthatm",
-      "ustbes",
-      "plit"
-    )
-    wrapFileContents(filePath, 6) should be(expectedOutput)
+    "build a formatted window string" in {
+      val lines = List("hello", "world")
+      val width = 10
+      val height = 4
+
+      val expected =
+        "+----------+\n" +
+        "|hello     |\n" +
+        "|world     |\n" +
+        "|          |\n" +
+        "|          |\n" +
+        "+----------+"
+
+      buildWindowString(height, width, lines) should be(expected)
+    }
+  }
+
+  "The wrapFileContents function" should {
+    def withTempFile(content: String)(testCode: String => Any): Unit = {
+      val file = File.createTempFile("test", ".txt")
+      try {
+        new PrintWriter(file) { write(content); close() }
+        testCode(file.getAbsolutePath)
+      } finally {
+        file.delete()
+      }
+    }
+
+    "wrap a line that has a short word before a very long word" in {
+      val fileContent = "word superlongword"
+      withTempFile(fileContent) { filePath =>
+        val result = wrapFileContents(filePath, 10)
+        result should be(List("word", "superlongw", "ord"))
+      }
+    }
+
+    "keep multiple words on the same line if they fit" in {
+      val fileContent = "hello world test"
+      withTempFile(fileContent) { filePath =>
+        val result = wrapFileContents(filePath, 20)
+        result should be(List("hello world test"))
+      }
+    }
+
+    "return an empty list if the file does not exist" in {
+      val result = wrapFileContents("non-existent-file.txt", 10)
+      result should be(List.empty[String])
+    }
+    "wrap a line when a word does not fit" in {
+      val fileContent = "hello world again"
+      withTempFile(fileContent) { filePath =>
+        val result = wrapFileContents(filePath, 10)
+        result should be(List("hello", "world", "again"))
+      }
     }
   }
 }
