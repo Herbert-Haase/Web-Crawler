@@ -3,6 +3,8 @@ package de.htwg.webcrawler {
   def main(args: Array[String]): Unit = {
     val width = 3
     val height = 5
+
+    // create window
     val horizontal_line = hline(width)
 
     println(horizontal_line)
@@ -24,45 +26,58 @@ package de.htwg.webcrawler {
     }
   }
 
-// import scala.io.Source
-// import java.io.File
-//
-// @main def tui(s: Int): Unit = {
-//   val filename = new File("./TUI.scala")
-//   print_window(s, filename)
-// }
+  def wrapFileContents(file: String, width: Int): List[String] = {
+    import scala.io.Source
+    import scala.util.Using
+    import scala.collection.mutable.ListBuffer
 
-// def print_fromFile(line_width: Int, filename: File): String = {
-//   val leftover_w = False
-//   var result = ""
-//   for (line <- Source.fromFile(filename).getLines) {
-//     val words = line.split("\\s+")
-//     // val line_str = words.mkString(" ")
-//     for (word <- words) {
-//       if (line_width <= words.len) {
-//         line_width -= words.len
-//         // concat word to line
-//       } else {
-//         leftover_w = True
-//         // concat \n to line
-//       }
-//     }
-//     if (leftover_w) {
-//       return text_line
-//     } else {
-//       return text_line + "\n"
-//     }
-//   }
-// }
+    Using(Source.fromFile(file)) { source =>
+      val wrappedLines = ListBuffer[String]()
 
-// def print_window(s: Int, file: File): Unit = {
-//   val width = s * (s - 1)
-//   val horizontal_line = "+" + "-" * width + "+"
-//
-//   println(horizontal_line)
-//
-//   for (i <- 0 until s * 3)
-//     println("|" + /*print_fromFile(width, file)*/ " "*s + "|")
-//
-//   println(horizontal_line)
+      for (line <- source.getLines()) {
+        val words = line.split("\\s+").filter(_.nonEmpty)
+        var currentLine = new StringBuilder()
+
+        for (word <- words) {
+          if (word.length > width) {
+            // Word is longer than the line width, so it must be split.
+
+            if (currentLine.nonEmpty) {
+              wrappedLines += currentLine.toString()
+              currentLine.clear()
+            }
+
+            // Split the oversized word into chunks of 'width'.
+            word.grouped(width).foreach { chunk =>
+              wrappedLines += chunk
+            }
+
+            } else if (currentLine.nonEmpty && currentLine.length + 1 + word.length > width) {
+              // Word doesn't fit on the current line, so start a new one.
+              wrappedLines += currentLine.toString()
+              currentLine.clear()
+              currentLine.append(word)
+
+            } else {
+              // Word fits, so add it to the current line.
+              if (currentLine.nonEmpty) {
+                currentLine.append(" ")
+              }
+              currentLine.append(word)
+            }
+        }
+
+        if (currentLine.nonEmpty) {
+          wrappedLines += currentLine.toString()
+        }
+      }
+      wrappedLines.toList
+
+      }.getOrElse {
+        println(s"Error reading file: $file")
+        List.empty[String]
+      }
+  }
+
 }
+

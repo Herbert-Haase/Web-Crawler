@@ -22,5 +22,22 @@ class WebCrawlerSpec extends AnyWordSpec with Matchers {
       line(2, "hello") should be("|he|")
       line(9, "hello") should be("|hello    |")
     }
+    "have wrap lines" in {
+    val resource = getClass.getClassLoader.getResource("example.txt")
+    val filePath = resource.getPath
+
+    val expectedOutput = List(
+      "hello",
+      "world",
+      "hi",
+      "hi",
+      "averyl",
+      "ongwor",
+      "dthatm",
+      "ustbes",
+      "plit"
+    )
+    wrapFileContents(filePath, 6) should be(expectedOutput)
+    }
   }
 }
