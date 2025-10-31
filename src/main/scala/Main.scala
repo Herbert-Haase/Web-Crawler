@@ -1,6 +1,6 @@
-package de.htwg.webcrawler {
+package de.htwg.webscraper {
 
-  import de.htwg.webcrawler.TUI.*
+  import de.htwg.webscraper.TUI.*
 
   @main def run(): Unit = {
     val width = 80

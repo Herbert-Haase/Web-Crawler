@@ -1,9 +1,9 @@
-package de.htwg.webcrawler
+package de.htwg.webscraper
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import java.io.{File, PrintWriter}
-import de.htwg.webcrawler.TUI.*
+import de.htwg.webscraper.TUI.*
 
 class WebCrawlerSpec extends AnyWordSpec with Matchers {
 

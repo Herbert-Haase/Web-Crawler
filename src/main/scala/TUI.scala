@@ -1,4 +1,4 @@
-package de.htwg.webcrawler {
+package de.htwg.webscraper {
   object TUI {
 
     def buildWindowString(height: Int, width: Int, lines: List[String]): String = {
