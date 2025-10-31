@@ -1,29 +1,19 @@
-case class Cell(value: Int) {
-  def isSet: Boolean = value != 0
+case class Site(name: String, url: String) {
+  def getName: String = name
 }
 
-val cell1 = Cell(2)
-// cell1: Cell = Cell(2)
-cell1.isSet
-// res0: Boolean = true
+case class Spider(links: Int , current:Site) {
+  def isSet: Boolean = links != 0
+}
 
-val cell2 = Cell(0)
-// cell2: Cell = Cell(0)
-cell2.isSet
-// res1: Boolean = false
+val site1 = Site("google","google.com")
+val site2 = Site("youtube","youtube.com")
 
-case class Field(cells: Array[Cell])
+val spider1 = Spider(2,site1)
+val spider2 = Spider(0,site2)
 
-val field1 = Field(Array.ofDim[Cell](1))
-// field1: Field = Field([Lrepl.MdocSession$MdocApp$Cell;@7ab1b46c)
-field1.cells(0) = cell1
+spider1.isSetc
+spider2.isSet
 
-case class House(cells: Vector[Cell])
-
-val house = House(Vector(cell1, cell2))
-// house: House = House(Vector(Cell(2), Cell(0)))
-
-house.cells(0).value
-// res3: Int = 2
-house.cells(0).isSet
-// res4: Boolean = true
+site1.getName
+site2.getName
