@@ -1,10 +1,10 @@
-package de.htwg.webcrawler
+package de.htwg.webscraper
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webcrawler.TUI.* // Import your functions
+import de.htwg.webscraper.TUI.* // Import your functions
 
-class WebCrawlerSpec extends AnyWordSpec with Matchers {
+class WebscraperSpec extends AnyWordSpec with Matchers {
 
   "A TUI" should {
     "have a horizontal line of form '++'" in {
@@ -40,4 +40,32 @@ class WebCrawlerSpec extends AnyWordSpec with Matchers {
     wrapFileContents(filePath, 6) should be(expectedOutput)
     }
   }
+  "The Input function(s)" should {
+  "Give a greeting" in {
+    val greeting = "Welcome to WebScraper"
+    giveGreeting().should(be(greeting))
+  }
+  "Ask for Type of input" in {
+    val typeOfInputQuestion = "What type of input do you prefer? (stdin/file/url)"
+    askTypeOfInput().should(be(typeOfInputQuestion))
+  }
+  "Get Type of input" in {
+    getTypeOfInput().should(be oneOf("stdin","file","url"))
+  }
+  "Ask for input file or url" in { // Do not call if the user selected stdin
+    val inputfile = "Which file or url should be used?"
+    askInputFile().should(be(inputfile))
+  }
+  "Get input file" in { // Do not call if the user selected stdin 
+    getTypeOfInput().shouldBe(a[String])
+  }
+  "Get stdin" in { // Do not call if the user selected file/url
+    getStdin().shouldBe(a[String])
+  }
+  "Write temporary file" in {
+    val fileContent = "Hello World"
+    writeTemporaryFile(fileContent).shouldBe(a[File])
+  }
+}
+
 }
