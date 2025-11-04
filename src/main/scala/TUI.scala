@@ -1,28 +1,23 @@
 package de.htwg.webscraper {
-  object TUI {
+class Tui (x:Int, y:Int, file:String) {
+  val pipe:String = "|"
+  val plus:String = "+"
+  val minus:String = "-"
+  val space:String = " "
 
-    def buildWindowString(height: Int, width: Int, lines: List[String]): String = {
-      val horizontal_line = hline(width)
-      val windowContent = (0 until height).map { i =>
-        val textToPrint = if (i < lines.length) lines(i) else ""
-        line(width, textToPrint)
-      }.mkString("\n")
-
-      s"$horizontal_line\n$windowContent\n$horizontal_line"
-    }
-
-
-    def hline(width: Int = 0): String = {
-      "+" + "-" * width + "+"
-    }
-
-    def line(width: Int = 0, text: String = ""): String = {
-      if (text.isEmpty) {
-        "|" + " " * width + "|"
-      } else {
-        "|" + text.padTo(width, ' ').substring(0, width) + "|"
-      }
-    }
+  def build_bar(x:Int): String = plus + minus * x + plus
+  def build_line(width: Int = 0, text: String = ""): String = {
+    if (text.isEmpty) pipe + " " * width + pipe else {
+    pipe + text.padTo(width, ' ').substring(0, width) + pipe
+    }}
+  def build_tower(width: Int, height: Int, lines: List[String]): String = {
+    (0 until height).map { i =>
+    val text = if (i < lines.length) lines(i) else ""
+    build_line(width, text)
+    }.mkString("\n")
+  }
+  def build_all(): String = build_bar(x) + "\n" + build_tower(x, y, wrapFileContents(file, x)) + "\n" + build_bar(x)
+  def print_Tui(): Unit = println(build_all())
 
     def wrapFileContents(file: String, width: Int): List[String] = {
       import scala.io.Source
@@ -78,5 +73,4 @@ package de.htwg.webscraper {
     }
 
   }
-
 }
