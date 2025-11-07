@@ -71,6 +71,11 @@ class Tui (x:Int, y:Int, file:String) {
           List.empty[String]
         }
     }
+    def giveGreeting(): String = "Welcome to WebScraper"
+    def getTypeOfInput(): String = {
+      // readline
+
+    }
 
   }
 }

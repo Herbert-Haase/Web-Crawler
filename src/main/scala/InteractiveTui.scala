@@ -10,13 +10,11 @@ class InteractiveTui(width: Int, height: Int) {
 
     val tempFile = File.createTempFile("interactive-", ".txt")
     try {
-      // Use a PrintWriter to write to the file
       val writer = new PrintWriter(tempFile)
       try {
-        // Use println to ensure each line gets a newline character
         lines.foreach(writer.println)
       } finally {
-        writer.close() // Always close the writer
+        writer.close()
       }
 
       val tui = new Tui(width, height, tempFile.getAbsolutePath)

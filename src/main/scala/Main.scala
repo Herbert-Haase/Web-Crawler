@@ -3,6 +3,7 @@ package de.htwg.webscraper
 @main def run(args: String*): Unit = {
   if (args.length < 2) {
     println("No arguments provided. Starting interactive mode.")
+    println("You can provide arguments with 'sbt ")
     val interactiveTui = new InteractiveTui(80,10)
     interactiveTui.run()
   } else {
