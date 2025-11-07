@@ -4,6 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.webscraper
 import java.io.{File, PrintWriter}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintStream}
 
 class WebscraperSpec extends AnyWordSpec with Matchers {
   // Helper function to create a temporary file with specific content for a test
@@ -71,33 +72,62 @@ class WebscraperSpec extends AnyWordSpec with Matchers {
       }
     }
   }
-  "The Input function(s)" should {
-      val tui = new Tui(1, 1, "")
-  "Give a greeting" in {
-    val greeting = "Welcome to WebScraper"
-    tui.giveGreeting().should(be(greeting))
+  "An InteractiveTui" should {
+    "read user input, create a formatted window, and print it to the console" in {
+      val userInput = "First line\nSecond line\n\n"
+      val inputStream = new ByteArrayInputStream(userInput.getBytes)
+
+      val outputStream = new ByteArrayOutputStream()
+      val printStream = new PrintStream(outputStream)
+
+      Console.withIn(inputStream) {
+        Console.withOut(printStream) {
+          val interactiveTui = new InteractiveTui(width = 20, height = 4)
+          interactiveTui.run()
+        }
+      }
+
+      val capturedOutput = outputStream.toString
+
+      val expectedTui =
+        "+--------------------+\n" +
+        "|First line          |\n" +
+        "|Second line         |\n" +
+        "|                    |\n" +
+        "|                    |\n" +
+        "+--------------------+"
+
+      capturedOutput should include("Please enter your text. Press Enter on an empty line to finish.")
+      capturedOutput should include(expectedTui)
+    }
   }
-  "Ask for Type of input" in {
-    val typeOfInputQuestion = "What type of input do you prefer? (stdin/file/url)"
-    tui.askTypeOfInput().should(be(typeOfInputQuestion))
-  }
-  "Get Type of input" in {
-    tui.getTypeOfInput().should(be oneOf("stdin","file","url"))
-  }
-  "Ask for input file or url" in { // Do not call if the user selected stdin
-    val inputfile = "Which file or url should be used?"
-    tui.askInputFile().should(be(inputfile))
-  }
-  "Get input file" in { // Do not call if the user selected stdin 
-    tui.getTypeOfInput().shouldBe(a[String])
-  }
-  "Get stdin" in { // Do not call if the user selected file/url
-    tui.getStdin().shouldBe(a[String])
-  }
-  "Write temporary file" in {
-    val fileContent = "Hello World"
-    tui.writeTemporaryFile(fileContent).shouldBe(a[File])
-  }
-}
+//   "The Input function(s)" should {
+//       val tui = new Tui(1, 1, "")
+//   "Give a greeting" in {
+//     val greeting = "Welcome to WebScraper"
+//     tui.giveGreeting().should(be(greeting))
+//   }
+//   "Ask for Type of input" in {
+//     val typeOfInputQuestion = "What type of input do you prefer? (stdin/file/url)"
+//     tui.askTypeOfInput().should(be(typeOfInputQuestion))
+//   }
+//   "Get Type of input" in {
+//     tui.getTypeOfInput().should(be oneOf("stdin","file","url"))
+//   }
+//   "Ask for input file or url" in { // Do not call if the user selected stdin
+//     val inputfile = "Which file or url should be used?"
+//     tui.askInputFile().should(be(inputfile))
+//   }
+//   "Get input file" in { // Do not call if the user selected stdin
+//     tui.getTypeOfInput().shouldBe(a[String])
+//   }
+//   "Get stdin" in { // Do not call if the user selected file/url
+//     tui.getStdin().shouldBe(a[String])
+//   }
+//   "Write temporary file" in {
+//     val fileContent = "Hello World"
+//     tui.writeTemporaryFile(fileContent).shouldBe(a[File])
+//   }
+// }
 
 }
