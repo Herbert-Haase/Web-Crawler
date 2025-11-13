@@ -1,8 +1,9 @@
-package de.htwg.webscraper.view
+package de.htwg.webscraper.aview
 
 import de.htwg.webscraper.controller.Controller
-import de.htwg.webscraper.util.Observer
+import de.htwg.webscraper.model.Observer
 import scala.io.StdIn.readLine
+import scala.collection.mutable.ListBuffer
 
 class Tui(controller: Controller, width: Int, height: Int) extends Observer {
   controller.add(this)
@@ -16,7 +17,7 @@ class Tui(controller: Controller, width: Int, height: Int) extends Observer {
     println("Enter 'file <path>' to load a file, or 'text' to enter multiline text:")
     val input = readLine()
     input.split(" ").toList match {
-      case "file" :: path :: Nil => controller.processFile(path.mkString(" "))
+      case "file" :: path :: Nil => controller.processFile(path.mkString(""))
       case "text" :: Nil         =>
         println("Please enter your text. Press Enter on an empty line to finish.")
         val lines = LazyList.continually(readLine()).takeWhile(line => line != null && line.nonEmpty).toList
@@ -33,7 +34,7 @@ class Tui(controller: Controller, width: Int, height: Int) extends Observer {
     processInput()
   }
 
-  private def buildTuiString(): String = {
+  def buildTuiString(): String = {
     val wrappedLines = wrapLines(controller.data.lines, width)
     val tower = buildTower(width, height, wrappedLines)
     val bar = buildBar(width)

@@ -1,4 +1,4 @@
-package de.htwg.webscraper.util
+package de.htwg.webscraper.model
 
 trait Observer {
   def update(): Unit

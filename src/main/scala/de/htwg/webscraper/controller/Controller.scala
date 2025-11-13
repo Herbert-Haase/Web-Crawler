@@ -1,7 +1,7 @@
 package de.htwg.webscraper.controller
 
 import de.htwg.webscraper.model.Data
-import de.htwg.webscraper.util.Observable
+import de.htwg.webscraper.model.Observable
 import scala.io.Source
 import scala.util.Using
 import scala.collection.mutable.ListBuffer

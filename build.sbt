@@ -13,5 +13,4 @@ lazy val root = project
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     coverageMinimumStmtTotal := 100,
     coverageExcludedFiles := ".*Main\\.scala",
-    mainClass := Some("de.htwg.webscraper.run"),
   )
