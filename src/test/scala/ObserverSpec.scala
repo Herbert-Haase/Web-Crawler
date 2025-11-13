@@ -2,7 +2,7 @@ package de.htwg.webscraper.util
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.model.{Observable, Observer}
+import de.htwg.webscraper.controller.{Observable, Observer}
 
 class ObserverSpec extends AnyWordSpec with Matchers {
 

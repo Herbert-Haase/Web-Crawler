@@ -1,7 +1,6 @@
 package de.htwg.webscraper.controller
 
 import de.htwg.webscraper.model.Data
-import de.htwg.webscraper.model.Observer
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
