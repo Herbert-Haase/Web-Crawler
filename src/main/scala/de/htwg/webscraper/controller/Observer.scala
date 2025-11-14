@@ -1,12 +1,12 @@
 package de.htwg.webscraper.controller
 
-trait Observer {
-  def update(): Unit
+trait Observable {
+  protected var subscribers: Vector[Observer] = Vector()
+  def add(s: Observer): Unit = subscribers = subscribers :+ s
+  def remove(s: Observer): Unit = subscribers = subscribers.filterNot(_ == s)
+  def notifyObservers(isFilterUpdate: Boolean = false): Unit = subscribers.foreach(_.update(isFilterUpdate))
 }
 
-class Observable {
-  var subscribers: Vector[Observer] = Vector()
-  def add(s: Observer): Unit = subscribers = subscribers :+ s
-  def remove(s: Observer): Unit = subscribers = subscribers.filterNot(o => o == s)
-  def notifyObservers(): Unit = subscribers.foreach(o => o.update())
+trait Observer {
+  def update(isFilterUpdate: Boolean = false): Unit
 }

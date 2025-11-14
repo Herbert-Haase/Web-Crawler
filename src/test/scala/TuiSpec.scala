@@ -1,188 +1,113 @@
 package de.htwg.webscraper.aview
 
 import de.htwg.webscraper.controller.Controller
-import de.htwg.webscraper.model.Data
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
 class TuiSpec extends AnyWordSpec with Matchers {
 
-  "A TUI" should {
-
-    "build an empty TUI string when data is empty" in {
+  "A Tui's buildStatsString method" should {
+    "create a correct statistics string" in {
       val controller = new Controller()
-      val tui = new Tui(controller, 10, 3) // width=10, height=3
-      controller.data = Data(List.empty)
+      val tui = new Tui(controller, 80, 10)
+      controller.data = controller.data.copy(characterCount = 29, wordCount = 6, mostCommonWords = List(("three", 3), ("two", 2), ("one", 1)))
 
-      val expectedString =
-        "+----------+\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
+      val expected =
+        """
+          ||--- Statistics ---
+          ||Total Characters: 29
+          ||Total Words: 6
+          ||Most Common Words: 'three' (3), 'two' (2), 'one' (1)
+          ||--------------------
+          |""".stripMargin
+      tui.buildStatsString() should be(expected)
     }
 
-    "build a TUI string with a single short line" in {
+    "show 'N/A' for most common words when there are no words" in {
       val controller = new Controller()
-      val tui = new Tui(controller, 10, 3) // width=10, height=3
-      controller.data = Data(List("Hello"))
+      val tui = new Tui(controller, 80, 10)
+      controller.data = controller.data.copy(characterCount = 0, wordCount = 0, mostCommonWords = List.empty)
 
-      val expectedString =
-        "+----------+\n" +
-        "|Hello     |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
+      val expected =
+        """
+          ||--- Statistics ---
+          ||Total Characters: 0
+          ||Total Words: 0
+          ||Most Common Words: N/A
+          ||--------------------
+          |""".stripMargin
+      tui.buildStatsString() should be(expected)
     }
+  }
 
-    "build a TUI string with multiple lines fewer than height" in {
+  "A Tui's buildTuiString method" should {
+    "build a frame around simple text" in {
       val controller = new Controller()
-      val tui = new Tui(controller, 10, 3) // width=10, height=3
-      controller.data = Data(List("Hello", "World"))
+      val tui = new Tui(controller, 20, 3)
+      controller.data = controller.data.copy(displayLines = List("Hello", "World"))
 
-      val expectedString =
-        "+----------+\n" +
-        "|Hello     |\n" +
-        "|World     |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
+      val expected =
+        """
+          |+--------------------+
+          ||Hello               |
+          ||World               |
+          ||                    |
+          |+--------------------+""".stripMargin.trim
+
+      tui.buildTuiString().trim should be(expected)
     }
+  }
+  // This test should be added inside "A Tui's buildTuiString method" should { ... } block
 
-    "build a TUI string with multiple lines exactly equal to height" in {
+  "break words that are longer than the specified width" in {
+    val controller = new Controller()
+    val tui = new Tui(controller, 10, 3) // Use a small width for testing
+    controller.data = controller.data.copy(displayLines = List("A superlongword"))
+
+    val expected =
+      """
+        |+----------+
+        ||A         |
+        ||superlongw|
+        ||ord       |
+        |+----------+""".stripMargin.trim
+
+    tui.buildTuiString().trim should be(expected)
+  }
+
+  "wrap a line before processing a word that is too long" in {
       val controller = new Controller()
-      val tui = new Tui(controller, 10, 3) // width=10, height=3
-      controller.data = Data(List("Line 1", "Line 2", "Line 3"))
+      val tui = new Tui(controller, 10, 3)
+      controller.data = controller.data.copy(displayLines = List("short superlongword"))
 
-      val expectedString =
-        "+----------+\n" +
-        "|Line 1    |\n" +
-        "|Line 2    |\n" +
-        "|Line 3    |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
+      val expected =
+      """
+          |+----------+
+          ||short     |
+          ||superlongw|
+          ||ord       |
+          |+----------+""".stripMargin.trim
 
-    "build a TUI string and truncate lines more than height" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 3) // width=10, height=3
-      controller.data = Data(List("Line 1", "Line 2", "Line 3", "Line 4"))
+      tui.buildTuiString().trim should be(expected)
+  }
+  "wrap a line with multiple words to cover standard wrapping" in {
+    val controller = new Controller()
+    val tui = new Tui(controller, 15, 4) // A width of 15
+    controller.data = controller.data.copy(displayLines = List("This line is just long enough to wrap."))
 
-      val expectedString =
-        "+----------+\n" +
-        "|Line 1    |\n" +
-        "|Line 2    |\n" +
-        "|Line 3    |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
+    // "This line is" has length 12. The next word "just" (4) makes the total 12 + 1 + 4 = 17, which is > 15.
+    // This forces the wrap, testing the specific `else if` block.
+    // "just long" is 9. The next word "enough" (6) makes it 9 + 1 + 6 = 16, which is > 15.
+    // This forces a second wrap.
+    val expected =
+      """
+        |+---------------+
+        ||This line is   |
+        ||just long      |
+        ||enough to wrap.|
+        ||               |
+        |+---------------+""".stripMargin.trim
 
-    "build a TUI string with simple word wrapping" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 5) // width=10, height=5
-      controller.data = Data(List("Hello world this is a test"))
-
-      // "Hello" (5)
-      // "world" (5) + " " + "this" (4) = 10 -> "world this"
-      // "is" (2) + " " + "a" (1) + " " + "test" (4) = 9 -> "is a test"
-      val expectedString =
-        "+----------+\n" +
-        "|Hello     |\n" +
-        "|world this|\n" +
-        "|is a test |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
-
-    "build a TUI string by breaking words longer than width" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 5) // width=10, height=5
-      controller.data = Data(List("abcdefghijklmnopqrstuvwxyz"))
-
-      // "abcdefghij"
-      // "klmnopqrst"
-      // "uvwxyz"
-      val expectedString =
-        "+----------+\n" +
-        "|abcdefghij|\n" +
-        "|klmnopqrst|\n" +
-        "|uvwxyz    |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
-
-    "build a TUI string with mixed normal words and long words" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 5) // width=10, height=5
-      controller.data = Data(List("A verylongwordinthetext"))
-
-      // "A"
-      // "verylongwo"
-      // "rdinthetex"
-      // "t"
-      val expectedString =
-        "+----------+\n" +
-        "|A         |\n" +
-        "|verylongwo|\n" +
-        "|rdinthetex|\n" +
-        "|t         |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
-
-    "build a TUI string correctly handling multiple lines from controller" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 5) // width=10, height=5
-      controller.data = Data(List("First line wraps", "Second line"))
-
-      // "First line"
-      // "wraps"
-      // "Second"
-      // "line"
-      val expectedString =
-        "+----------+\n" +
-        "|First line|\n" +
-        "|wraps     |\n" +
-        "|Second    |\n" +
-        "|line      |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
-
-    "build a TUI string ignoring empty lines in the data" in {
-      val controller = new Controller()
-      val tui = new Tui(controller, 10, 5) // width=10, height=5
-      controller.data = Data(List("Line 1", "", "Line 3"))
-
-      // "Line 1"
-      // "Line 3"
-      val expectedString =
-        "+----------+\n" +
-        "|Line 1    |\n" +
-        "|Line 3    |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "|          |\n" +
-        "+----------+"
-      
-      tui.buildTuiString() shouldBe expectedString
-    }
+    tui.buildTuiString().trim should be(expected)
   }
 }

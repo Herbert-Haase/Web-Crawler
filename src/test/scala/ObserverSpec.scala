@@ -1,53 +1,84 @@
-package de.htwg.webscraper.util
+package de.htwg.webscraper.controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.controller.{Observable, Observer}
+
+// A concrete implementation of Observable that exposes the protected subscribers for testing
+class TestObservable extends Observable {
+  // Expose the protected subscribers list for white-box testing
+  def getSubscribers: Vector[Observer] = subscribers
+}
+
+// A helper observer for testing, updated for the new Observer trait
+class TestObserver extends Observer {
+  var wasNotified = false
+  var lastFilterFlag: Boolean = false
+  override def update(isFilterUpdate: Boolean): Unit = {
+    wasNotified = true
+    lastFilterFlag = isFilterUpdate
+  }
+}
 
 class ObserverSpec extends AnyWordSpec with Matchers {
 
   "An Observable" should {
+
     "add an observer" in {
-      val observable = new Observable()
+      val observable = new TestObservable()
       val observer = new TestObserver()
-      observable.subscribers should be(empty)
+      observable.getSubscribers should be(empty)
       observable.add(observer)
-      observable.subscribers should contain(observer)
+      observable.getSubscribers should contain(observer)
     }
 
     "remove an observer" in {
-      val observable = new Observable()
+      val observable = new TestObservable()
       val observer1 = new TestObserver()
       val observer2 = new TestObserver()
       observable.add(observer1)
       observable.add(observer2)
-      observable.subscribers should contain allOf (observer1, observer2)
-      
+      observable.getSubscribers should contain allOf (observer1, observer2)
+
       observable.remove(observer1)
-      observable.subscribers should not contain (observer1)
-      observable.subscribers should contain(observer2)
+      observable.getSubscribers should not contain (observer1)
+      observable.getSubscribers should contain(observer2)
     }
 
-    "notify observers" in {
-      val observable = new Observable()
+    "notify observers with correct flags" in {
+      val observable = new TestObservable()
       val observer1 = new TestObserver()
       val observer2 = new TestObserver()
       observable.add(observer1)
       observable.add(observer2)
 
-      observer1.updated should be(false)
-      observer2.updated should be(false)
+      // Initial state
+      observer1.wasNotified should be(false)
+      observer2.wasNotified should be(false)
 
+      // Test default notification (isFilterUpdate = false)
       observable.notifyObservers()
+      observer1.wasNotified should be(true)
+      observer2.wasNotified should be(true)
+      observer1.lastFilterFlag should be(false)
+      observer2.lastFilterFlag should be(false)
 
-      observer1.updated should be(true)
-      observer2.updated should be(true)
+      // Reset state for next test
+      observer1.wasNotified = false
+      observer2.wasNotified = false
+
+      // Test filtered notification (isFilterUpdate = true)
+      observable.notifyObservers(isFilterUpdate = true)
+      observer1.wasNotified should be(true)
+      observer2.wasNotified should be(true)
+      observer1.lastFilterFlag should be(true)
+      observer2.lastFilterFlag should be(true)
+    }
+
+    "not fail when notifying with no observers" in {
+      val observable = new TestObservable()
+      noException should be thrownBy {
+        observable.notifyObservers()
+      }
     }
   }
-}
-
-// A helper class for testing
-class TestObserver extends Observer {
-  var updated = false
-  override def update(): Unit = updated = true
 }

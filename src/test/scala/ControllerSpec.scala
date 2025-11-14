@@ -1,67 +1,58 @@
 package de.htwg.webscraper.controller
 
-import de.htwg.webscraper.model.Data
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-
 import java.io.{File, PrintWriter}
+
+// Helper class for testing the Observable pattern
+class TestObserver extends Observer {
+  var wasNotified = false
+  var isFilter = false
+  override def update(isFilterUpdate: Boolean): Unit = {
+    wasNotified = true
+    isFilter = isFilterUpdate
+  }
+}
 
 class ControllerSpec extends AnyWordSpec with Matchers {
 
   "A Controller" should {
-    var updated = false
-    val testObserver = new Observer {
-      override def update(): Unit = updated = true
-    }
-
-    "process text input" in {
+    "process a file and notify observers" in {
       val controller = new Controller()
-      controller.add(testObserver)
-      updated = false // reset flag
-
-      val testText = "Hello world\nThis is a test"
-      controller.processText(testText)
-
-      controller.data should be(Data(List("Hello world", "This is a test")))
-      updated should be(true)
-    }
-
-    "process a file input" in {
-      val controller = new Controller()
-      controller.add(testObserver)
-      updated = false // reset flag
-
-      // Create a temporary file for testing
-      val testFile = new File("testfile.txt")
-      val writer = new PrintWriter(testFile)
-      writer.println("Line 1 from file")
-      writer.println("Line 2 from file")
+      val tempFile = File.createTempFile("test", ".txt")
+      tempFile.deleteOnExit()
+      val writer = new PrintWriter(tempFile)
+      writer.println("Line 1 from file.")
+      writer.println("Line 2 from file.")
       writer.close()
 
-      controller.processFile(testFile.getPath)
-
-      controller.data should be(Data(List("Line 1 from file", "Line 2 from file")))
-      updated should be(true)
-
-      // Clean up the temporary file
-      testFile.delete()
+      controller.processFile(tempFile.getAbsolutePath)
+      controller.data.wordCount should be(6)
     }
 
-    "handle a non-existent file" in {
+    "filter data by a word and recalculate stats" in {
       val controller = new Controller()
-      controller.add(testObserver)
-      updated = false // reset flag
+      controller.processText("First line with scala\nSecond line with java\nThird line with scala and python")
+      controller.filterByWord("scala")
 
-      val badFilePath = "nonexistentfile.txt"
-      controller.processFile(badFilePath)
-
-      controller.data.lines.head should include(s"Error: Could not read file '$badFilePath'")
-      updated should be(true)
+      controller.data.wordCount should be(10)
+      controller.data.mostCommonWords should contain allOf (("scala", 2), ("with", 2), ("line", 2))
     }
 
-    "start with empty data" in {
+    "handle a non-existent file gracefully to cover getOrElse" in {
       val controller = new Controller()
-      controller.data should be(Data(List.empty))
+      val observer = new TestObserver
+      controller.add(observer)
+      val nonExistentPath = "/path/that/absolutely/does/not/exist.txt"
+
+      controller.processFile(nonExistentPath)
+
+      // Verify that the observer was notified of the change
+      observer.wasNotified should be(true)
+
+      // Verify that the data was updated with the error message
+      controller.data.originalLines should have size 1
+      controller.data.originalLines.head should be(s"Error: Could not read file '$nonExistentPath'.")
     }
   }
 }

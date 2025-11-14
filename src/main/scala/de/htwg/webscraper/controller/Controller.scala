@@ -3,7 +3,6 @@ package de.htwg.webscraper.controller
 import de.htwg.webscraper.model.Data
 import scala.io.Source
 import scala.util.Using
-import scala.collection.mutable.ListBuffer
 
 class Controller extends Observable {
   var data: Data = Data(List.empty)
@@ -17,10 +16,16 @@ class Controller extends Observable {
     val linesFromFile = Using(Source.fromFile(filePath)) { source =>
       source.getLines().toList
     }.getOrElse {
-      println(s"Error reading file: $filePath")
       List(s"Error: Could not read file '$filePath'.")
     }
     data = Data(linesFromFile)
     notifyObservers()
+  }
+
+  def filterByWord(word: String): Unit = {
+    val filteredLines = data.originalLines.filter(_.toLowerCase.contains(word.toLowerCase))
+    // Create a new Data object with recalculated stats based on the filtered lines
+    data = Data.fromFiltered(data.originalLines, filteredLines)
+    notifyObservers(isFilterUpdate = true)
   }
 }
