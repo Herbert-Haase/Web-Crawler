@@ -114,5 +114,5 @@ WebReport follows a clean, modular architecture designed for testability and ext
 - **Dependency Injection**: Google Guice
 - **Testing**: ScalaTest
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/Herbert-Haase/WebReport/blob/main/LICENSE) file for details.
+## Presentation
+The Presentation for this project can be found [here](https://github.com/Herbert-Haase/WebReport/blob/main/src/main/resources/presentation_v3.pdf).
